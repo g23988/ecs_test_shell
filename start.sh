@@ -4,6 +4,8 @@ sudo yum install -y docker
 sudo service docker start
 sudo usermod -a -G docker ec2-user
 
+workdir=$(pwd)
+
 mkdir -p /opt/setup
 cd /opt/setup/
 touch Dockerfile
@@ -48,3 +50,9 @@ docker tag hello-world $repositoryUri
 ECRloginCommand=$(aws ecr get-login --no-include-email)
 eval " $ECRloginCommand"
 docker push $repositoryUri
+
+##info : create task
+cp $workdir/hello-world-task-def.json .
+eval " $workdir/createTask.py $repositoryUri"
+aws ecs register-task-definition --cli-input-json file://`pwd`/hello-world-task-def.json
+
